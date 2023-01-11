@@ -1,48 +1,29 @@
 #include <GL/gl.h>
 #include <GL/glu.h>
 #include <GL/glut.h>
-
 #include <stdlib.h>
 #include <windows.h>
 #include <math.h>
 
-float xRotated = 90.0, yRotated = 0.0, zRotated = 0.0;
+#include <stdio.h>
+#include <time.h>
+#include <MMSystem.h>
+#include <iostream>
+using namespace std;
 
-//------------------------------  reshapeFunc  ---------------------------------
-
-void reshapeFunc (int w, int h)
+void display();
+void reshape(int,int);
+void timer(int);
+float angle = 0.0;
+float x_position = 0.0;
+float y_position = 0.0;
+float z_position = 0.0;
+int state = 1; //1 y3ny right -1 y3ny left
+void init()
 {
-    glViewport(0,0,(GLsizei)w,(GLsizei)h);
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    gluPerspective (40.0, (GLdouble)w / (GLdouble)h, 0.5, 20.0);
-    glMatrixMode(GL_MODELVIEW);
+    glClearColor(0.2,0.3,0.4,1.0); //red green blue alpha
+    glEnable(GL_DEPTH_TEST);
 }
-
-//------------------------------  display   -------------------------------
-
-void display (void)
-{
-
-    glClear        (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glLoadIdentity ();
-    glTranslatef    (0.0, 0.0, -15.0);
-
-	//Your code is written here
-
-
-
-    glutSwapBuffers();
-}
-
-//--------------------------------  idleFunc  ----------------------------------
-
-void idleFunc (void)
-{
-    zRotated += 1;
-    glutPostRedisplay();
-}
-
 void texture (void){
 
 const GLfloat light_ambient[]  = { 0.0f, 0.0f, 0.0f, 1.0f };
@@ -78,27 +59,334 @@ const GLfloat high_shininess[] = { 100.0f };
 
 
 }
-
-//----------------------------------  main  ------------------------------------
-
-
-int main (int argc, char **argv)
+void keyboard(unsigned char Key, int x, int y)
 {
-    glutInit               (&argc, argv);
-    glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE); // buffer mode
-    glutInitWindowSize     (800, 700);
-    glutInitWindowPosition (700, 200);
-    glutCreateWindow       ("Sphere Rotating Animation");
+    switch(Key){
+    case 'd' : y_position++;
+    break;
 
-    glClearColor (1.0, 1.0, 1.0, 0.0);
-
-    glutDisplayFunc (display);
-    glutReshapeFunc (reshapeFunc);
-    glutIdleFunc    (idleFunc);
-
-    glClearColor(1,1,1,1);
-    texture(); // Lighting and textures
+    case 'a' : y_position--;
+    break;
 
 
-    glutMainLoop();
+    }
+}
+void OnMouseClick(int button , int state, int x , int y){
+   if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN){
+    z_position--;
+   }
+
+}
+
+
+int main(int argc,char**argv)
+{
+   glutInit(&argc,argv);
+   glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
+   glutInitWindowPosition(200,0); //position
+   glutInitWindowSize(500,500); //size
+   glutCreateWindow("16101256");
+   //sndPlaySound("F:\\cgraphics\\F:\\cgraphics\\3D Project Computer Graphics\\bestmusic.wav",SND_ASYNC|SND_LOOP);
+   //PlaySound(TEXT("bestmusic.wav"),NULL , SND_SYNC);
+   glutMouseFunc (OnMouseClick);
+   glutKeyboardFunc(keyboard);
+   glutDisplayFunc(display);
+   glutReshapeFunc(reshape);
+   glutTimerFunc(0,timer,0);
+   init();
+   texture(); // Lighting and textures
+   glutMainLoop();
+}
+
+
+void display()
+{
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); //the flag to clear the frame buffer
+    glLoadIdentity(); //to reset any coordinates
+
+    glTranslatef(0.0,y_position,-8.0);
+    glRotatef(angle , 1.0 , 0.0 , 0.0 );//angle & x
+    glRotatef(angle , 0.0 , 1.0 , 0.0 );//angle & y
+    glRotatef(angle , 0.0 , 0.0 , 1.0 );//angle & z
+
+    glBegin(GL_QUADS);
+
+    //front
+    glColor3f(1.0,0.0,0.0);
+    glVertex3f(-1.0,1.0,1.0);
+    glVertex3f(-1.0,-1.0,1.0);
+    glVertex3f(1.0,-1.0,1.0);
+    glVertex3f(1.0,1.0,1.0);
+    //back
+    glColor3f(0.0,1.0,0.0);
+    glVertex3f(1.0,1.0,-1.0);
+    glVertex3f(1.0,-1.0,-1.0);
+    glVertex3f(-1.0,-1.0,-1.0);
+    glVertex3f(-1.0,1.0,-1.0);
+    //right
+    glColor3f(0.0,0.0,1.0);
+    glVertex3f(1.0,1.0,1.0);
+    glVertex3f(1.0,-1.0,1.0);
+    glVertex3f(1.0,-1.0,-1.0);
+    glVertex3f(1.0,1.0,-1.0);
+    //left
+    glColor3f(1.0,1.0,0.0);
+    glVertex3f(-1.0,1.0,-1.0);
+    glVertex3f(-1.0,-1.0,-1.0);
+    glVertex3f(-1.0,-1.0,1.0);
+    glVertex3f(-1.0,1.0,1.0);
+    //top
+    glColor3f(0.0,1.0,1.0);
+    glVertex3f(-1.0,1.0,-1.0);
+    glVertex3f(-1.0,1.0,1.0);
+    glVertex3f(1.0,1.0,1.0);
+    glVertex3f(1.0,1.0,-1.0);
+    //bottom
+    glColor3f(1.0,0.0,1.0);
+    glVertex3f(-1.0,-1.0,-1.0);
+    glVertex3f(-1.0,-1.0,1.0);
+    glVertex3f(1.0,-1.0,1.0);
+    glVertex3f(1.0,-1.0,-1.0);
+
+    glEnd();
+
+    glLoadIdentity();
+    glTranslatef(3.5, -2.0, x_position);  // Move left and into the screen
+    glRotatef(angle , 1.0 , 0.0 , 0.0 );//Rotate on x
+    glBegin(GL_TRIANGLES);           // Begin drawing the pyramid with 4 triangles
+
+    // Front
+    glColor3f(1.0, 0.0, 0.0);     // Red
+    glVertex3f( 0.0, 1.0, 0.0);
+    glVertex3f(-1.0, -1.0, 1.0);
+    glVertex3f(1.0, -1.0, 1.0);
+    // Right
+    glColor3f(1.0, 0.0, 0.0);     // Red
+    glVertex3f(0.0, 1.0, 0.0);
+    glVertex3f(1.0, -1.0, 1.0);
+    glVertex3f(1.0, -1.0, -1.0);
+
+    // Back
+    glColor3f(1.0, 0.0, 0.0);     // Red
+    glVertex3f(0.0, 1.0, 0.0);
+    glVertex3f(1.0, -1.0, -1.0);
+    glVertex3f(-1.0, -1.0, -1.0);
+
+    // Left
+    glColor3f(1.0,0.0,0.0);       // Red
+    glVertex3f( 0.0, 1.0, 0.0);
+    glVertex3f(-1.0,-1.0,-1.0);
+    glVertex3f(-1.0,-1.0, 1.0);
+    glEnd();
+
+
+    glLoadIdentity();
+    glTranslatef(3.5, -2.0, z_position);  // Move left and into the screen
+    glRotatef(angle , 1.0 , 0.0 , 0.0 );//Rotate on x
+    glBegin(GL_TRIANGLES);           // Begin drawing the pyramid with 4 triangles
+
+    // Front
+    glColor3f(1.0, 0.0, 0.0);     // Red
+    glVertex3f( 0.0, 1.0, 0.0);
+    glVertex3f(-1.0, -1.0, 1.0);
+    glVertex3f(1.0, -1.0, 1.0);
+    // Right
+    glColor3f(1.0, 0.0, 0.0);     // Red
+    glVertex3f(0.0, 1.0, 0.0);
+    glVertex3f(1.0, -1.0, 1.0);
+    glVertex3f(1.0, -1.0, -1.0);
+
+    // Back
+    glColor3f(1.0, 0.0, 0.0);     // Red
+    glVertex3f(0.0, 1.0, 0.0);
+    glVertex3f(1.0, -1.0, -1.0);
+    glVertex3f(-1.0, -1.0, -1.0);
+
+    // Left
+    glColor3f(1.0,0.0,0.0);       // Red
+    glVertex3f( 0.0, 1.0, 0.0);
+    glVertex3f(-1.0,-1.0,-1.0);
+    glVertex3f(-1.0,-1.0, 1.0);
+    glEnd();
+
+    glLoadIdentity();                  // Reset the model-view matrix
+    glTranslatef(-3, -1.0,x_position);
+    glRotatef(angle , 0.0 , 1.0 , 0.0 );//Rotate on y
+    glBegin(GL_QUADS);                // Begin drawing the color cube with 6 quads
+
+    glColor3f(0.0, 1.0, 0.0);     // Green
+    glVertex3f( 1.0, 1.0, -1.0);
+    glVertex3f(-1.0, 1.0, -1.0);
+    glVertex3f(-1.0, 1.0,  1.0);
+    glVertex3f( 1.0, 1.0,  1.0);
+
+      // Bottom face (y = -1.0f)
+    glColor3f(1.0, 0.5, 0.0);     // Orange
+    glVertex3f( 1.0, -1.0,  1.0);
+    glVertex3f(-1.0, -1.0,  1.0);
+    glVertex3f(-1.0, -1.0, -1.0);
+    glVertex3f( 1.0, -1.0, -1.0);
+
+      // Front face  (z = 1.0f)
+    glColor3f(1.0, 0.0, 0.0);     // Red
+    glVertex3f(-1.0,  1.0,  1.0);
+    glVertex3f(-1.0,  1.0, -1.0);
+    glVertex3f(-1.0, -1.0, -1.0);
+    glVertex3f(-1.0, -1.0,  1.0);
+
+      // Back face (z = -1.0f)
+    glColor3f(1.0, 1.0, 0.0);     // Yellow
+    glVertex3f( 1.0, -1.0, -1.0);
+    glVertex3f(-1.0, -1.0, -1.0);
+    glVertex3f(-1.0,  1.0, -1.0);
+    glVertex3f( 1.0,  1.0, -1.0);
+
+    // Left face (x = -1.0f)
+    glColor3f(0.0, 0.0, 1.0);     // Blue
+    glVertex3f( 1.0,  1.0, 1.0);
+    glVertex3f(-1.0,  1.0, 1.0);
+    glVertex3f(-1.0, -1.0, 1.0);
+    glVertex3f( 1.0, -1.0, 1.0);
+
+    // Right face (x = 1.0f)
+    glColor3f(1.0, 0.0, 1.0);     // Magenta
+    glVertex3f(1.0,  1.0, -1.0);
+    glVertex3f(1.0,  1.0,  1.0);
+    glVertex3f(1.0, -1.0,  1.0);
+    glVertex3f(1.0, -1.0, -1.0);
+    glEnd();
+
+    glLoadIdentity();                  // Reset the model-view matrix
+    glTranslatef(-3.8, -1.0,-18);
+    glRotatef(angle , 0.0 , 1.0 , 0.0 );//Rotate on y
+    glBegin(GL_QUADS);                // Begin drawing the color cube with 6 quads
+
+    glColor3f(0.0, 1.0, 0.0);     // Green
+    glVertex3f( 1.0, 1.0, -1.0);
+    glVertex3f(-1.0, 1.0, -1.0);
+    glVertex3f(-1.0, 1.0,  1.0);
+    glVertex3f( 1.0, 1.0,  1.0);
+
+      // Bottom face (y = -1.0f)
+    glColor3f(1.0, 0.5, 0.0);     // Orange
+    glVertex3f( 1.0, -1.0,  1.0);
+    glVertex3f(-1.0, -1.0,  1.0);
+    glVertex3f(-1.0, -1.0, -1.0);
+    glVertex3f( 1.0, -1.0, -1.0);
+
+      // Front face  (z = 1.0f)
+    glColor3f(1.0, 0.0, 0.0);     // Red
+    glVertex3f(-1.0,  1.0,  1.0);
+    glVertex3f(-1.0,  1.0, -1.0);
+    glVertex3f(-1.0, -1.0, -1.0);
+    glVertex3f(-1.0, -1.0,  1.0);
+
+      // Back face (z = -1.0f)
+    glColor3f(1.0, 1.0, 0.0);     // Yellow
+    glVertex3f( 1.0, -1.0, -1.0);
+    glVertex3f(-1.0, -1.0, -1.0);
+    glVertex3f(-1.0,  1.0, -1.0);
+    glVertex3f( 1.0,  1.0, -1.0);
+
+    // Left face (x = -1.0f)
+    glColor3f(0.0, 0.0, 1.0);     // Blue
+    glVertex3f( 1.0,  1.0, 1.0);
+    glVertex3f(-1.0,  1.0, 1.0);
+    glVertex3f(-1.0, -1.0, 1.0);
+    glVertex3f( 1.0, -1.0, 1.0);
+
+    // Right face (x = 1.0f)
+    glColor3f(1.0, 0.0, 1.0);     // Magenta
+    glVertex3f(1.0,  1.0, -1.0);
+    glVertex3f(1.0,  1.0,  1.0);
+    glVertex3f(1.0, -1.0,  1.0);
+    glVertex3f(1.0, -1.0, -1.0);
+    glEnd();
+
+
+    glLoadIdentity();                  // Reset the model-view matrix
+    glTranslatef(2.8, -2.0,-16);
+    glRotatef(angle , 0.0 , 1.0 , 0.0 );//Rotate on y
+    glBegin(GL_QUADS);                // Begin drawing the color cube with 6 quads
+
+    glColor3f(0.0, 1.0, 0.0);     // Green
+    glVertex3f( 1.0, 1.0, -1.0);
+    glVertex3f(-1.0, 1.0, -1.0);
+    glVertex3f(-1.0, 1.0,  1.0);
+    glVertex3f( 1.0, 1.0,  1.0);
+
+      // Bottom face (y = -1.0f)
+    glColor3f(1.0, 0.5, 0.0);     // Orange
+    glVertex3f( 1.0, -1.0,  1.0);
+    glVertex3f(-1.0, -1.0,  1.0);
+    glVertex3f(-1.0, -1.0, -1.0);
+    glVertex3f( 1.0, -1.0, -1.0);
+
+      // Front face  (z = 1.0f)
+    glColor3f(1.0, 0.0, 0.0);     // Red
+    glVertex3f(-1.0,  1.0,  1.0);
+    glVertex3f(-1.0,  1.0, -1.0);
+    glVertex3f(-1.0, -1.0, -1.0);
+    glVertex3f(-1.0, -1.0,  1.0);
+
+      // Back face (z = -1.0f)
+    glColor3f(1.0, 1.0, 0.0);     // Yellow
+    glVertex3f( 1.0, -1.0, -1.0);
+    glVertex3f(-1.0, -1.0, -1.0);
+    glVertex3f(-1.0,  1.0, -1.0);
+    glVertex3f( 1.0,  1.0, -1.0);
+
+    // Left face (x = -1.0f)
+    glColor3f(0.0, 0.0, 1.0);     // Blue
+    glVertex3f( 1.0,  1.0, 1.0);
+    glVertex3f(-1.0,  1.0, 1.0);
+    glVertex3f(-1.0, -1.0, 1.0);
+    glVertex3f( 1.0, -1.0, 1.0);
+
+    // Right face (x = 1.0f)
+    glColor3f(1.0, 0.0, 1.0);     // Magenta
+    glVertex3f(1.0,  1.0, -1.0);
+    glVertex3f(1.0,  1.0,  1.0);
+    glVertex3f(1.0, -1.0,  1.0);
+    glVertex3f(1.0, -1.0, -1.0);
+    glEnd();
+
+    glutSwapBuffers();
+
+}
+
+void reshape(int w,int h)
+{
+    glViewport(0,0,(GLsizei)w,(GLsizei)h); //view port
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    gluPerspective(60 , 1 , 2.0 , 50.0);// field of view , expect ratio , Z near , Z far
+    glMatrixMode(GL_MODELVIEW);
+}
+void timer(int)
+{
+  glutPostRedisplay();
+  glutTimerFunc(1000/60,timer,0);
+
+  angle+=1.0;
+  if(angle>360.0)
+    angle=angle-360.0;
+
+  switch(state)
+  {
+  case 1 :
+    if(x_position<-5)
+        x_position+=0.10;
+    else
+        state = -1;
+    break;
+  case -1 :
+    if(x_position>-15)
+        x_position-=0.10;
+    else
+        state=1;
+    break;
+
+  }
+
 }
